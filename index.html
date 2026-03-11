@@ -7,26 +7,43 @@
     
     <style>
       body { margin: 0; overflow: hidden; }
+      /* Estilo para el botón de inicio */
+      #ui {
+        position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+        background: rgba(0,0,0,0.8); color: white;
+        display: flex; flex-direction: column; justify-content: center; align-items: center;
+        z-index: 9999; cursor: pointer; font-family: sans-serif;
+      }
+      #ui button {
+        padding: 15px 30px; font-size: 18px; cursor: pointer;
+        background: #00e5ff; border: none; border-radius: 5px; font-weight: bold;
+      }
     </style>
 
     <script>
+      // Componente para manejar el audio y video
       AFRAME.registerComponent('video-handler', {
         init: function () {
           const video = document.querySelector("#videomarian");
+          const ui = document.querySelector("#ui");
+          const btn = document.querySelector("#startBtn");
+
+          // Al hacer clic en el botón, desbloqueamos el audio
+          btn.addEventListener('click', () => {
+            video.muted = false; // Quitamos el silencio
+            ui.style.display = "none"; // Escondemos la interfaz
+          });
           
-          // Reproducir cuando se detecta el target
           this.el.addEventListener('targetFound', () => {
             video.play();
           });
 
-          // Pausar cuando se pierde el target
           this.el.addEventListener('targetLost', () => {
             video.pause();
           });
         }
       });
 
-      // Mantenemos tu efecto de parpadeo para el objeto 3D
       AFRAME.registerComponent('holographic-blink', {
         tick: function (t) {
           const mesh = this.el.getObject3D('mesh');
@@ -44,9 +61,13 @@
     </script>
   </head>
   <body>
+    <div id="ui">
+      <p>Bienvenido a la experiencia AR</p>
+      <button id="startBtn">ACTIVAR AUDIO Y CÁMARA</button>
+    </div>
+
     <a-scene 
       mindar-image="imageTargetSrc: ./target.mind;" 
-      video-handler
       color-space="sRGB" 
       renderer="colorManagement: true, physicallyCorrectLights: true" 
       vr-mode-ui="enabled: false" 
@@ -56,13 +77,12 @@
         <a-asset-item id="psyduckModel" src="./basecartaar.glb"></a-asset-item>
         <video id="videomarian" src="./videomarian.mp4" 
                preload="auto" loop="true" crossorigin="anonymous" 
-               webkit-playsinline playsinline muted></video>
+               webkit-playsinline playsinline></video>
       </a-assets>
 
       <a-camera position="0 0 0" look-controls="enabled: false"></a-camera>
 
-      <a-entity mindar-image-target="targetIndex: 0">
-        
+      <a-entity mindar-image-target="targetIndex: 0" video-handler>
         <a-gltf-model 
           src="#psyduckModel" 
           holographic-blink
@@ -79,10 +99,7 @@
           rotation="0 0 0"
           material="shader: flat; blending: additive; transparent: true; opacity: 0.9">
         </a-video>
-
       </a-entity>
-      
     </a-scene>
   </body>
 </html>
-
